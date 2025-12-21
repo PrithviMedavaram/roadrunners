@@ -4,35 +4,35 @@ import com.everest.model.Package;
 import com.everest.model.Vehicle;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 public class ETAService {
 
-    public Map<String, Double> calculateDeliveryTimes(
+    public void calculateETAs(
             List<Package> packages,
             List<Vehicle> vehicles
     ) {
-        Map<String, Double> result = new HashMap<>();
+        List<Package> sortedPackages = new ArrayList<>(packages);
 
-        packages.sort(Comparator.comparingDouble(Package::getWeight).reversed());
+
+        sortedPackages.sort(
+                Comparator.comparingDouble(Package::getWeight).reversed()
+        );
 
         for (Package pkg : packages) {
 
             Vehicle vehicle = vehicles.stream()
                     .min(Comparator.comparingDouble(Vehicle::getAvailableAt))
-                    .orElseThrow(() -> new IllegalStateException("No vehicles available"));
+                    .orElseThrow();
 
             double travelTime = pkg.getDistance() / vehicle.getSpeed();
-            double deliveryTime = vehicle.getAvailableAt() + travelTime;
+            double eta = vehicle.getAvailableAt() + travelTime;
 
+            pkg.setEstimatedDeliveryTime(eta);
             vehicle.assign(travelTime);
-
-            pkg.setEstimatedDeliveryTime(deliveryTime);
-
-            result.put(pkg.getId(), deliveryTime);
         }
-
-        return result;
     }
 }
