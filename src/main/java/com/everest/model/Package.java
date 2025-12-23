@@ -2,27 +2,34 @@ package com.everest.model;
 
 public class Package {
 
-    private String id;
-    private double weight;
-    private double distance;
-    private OfferCode offerCode;
+    private final String id;
+    private final double weight;
+    private final double distance;
+    private final OfferCode offerCode;
 
+    private double baseCost;
     private double discount;
     private double totalCost;
-    private double estimatedDeliveryTime;
+    private double eta;
+
 
     public Package(String id, double weight, double distance, OfferCode offerCode) {
         this.id = id;
         this.weight = weight;
         this.distance = distance;
         this.offerCode = offerCode;
-        this.totalCost = calculateBaseCost();
     }
 
-    private double calculateBaseCost() {
-        return 100
-                + (weight * 10)
-                + (distance * 5);
+    public void calculateCost() {
+        this.baseCost = 100 + (weight * 10) + (distance * 5);
+
+        if (offerCode.isApplicable(weight, distance)) {
+            this.discount = baseCost * offerCode.getDiscountRate();
+        } else {
+            this.discount = 0;
+        }
+
+        this.totalCost = baseCost - discount;
     }
 
     public String getId() {
@@ -37,27 +44,30 @@ public class Package {
         return distance;
     }
 
-    public OfferCode getOfferCode() {
-        return offerCode;
+    public double getBaseCost() {
+        return baseCost;
     }
 
     public double getDiscount() {
         return discount;
     }
-
     public void setDiscount(double discount) {
         this.discount = discount;
     }
 
     public double getTotalCost() {
-        return totalCost - discount;
+        return totalCost;
     }
 
-    public double getEstimatedDeliveryTime() {
-        return estimatedDeliveryTime;
+    public OfferCode getOfferCode() {
+        return offerCode;
     }
 
-    public void setEstimatedDeliveryTime(double estimatedDeliveryTime) {
-        this.estimatedDeliveryTime = estimatedDeliveryTime;
+    public double getEta() {
+        return eta;
+    }
+
+    public void setEta(double eta) {
+        this.eta = eta;
     }
 }

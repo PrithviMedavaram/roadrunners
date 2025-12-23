@@ -1,30 +1,29 @@
 package com.everest;
 
-import com.everest.model.*;
+import com.everest.model.OfferCode;
 import com.everest.model.Package;
-import com.everest.service.DiscountService;
+import com.everest.model.Vehicle;
 import com.everest.service.ETAService;
+import com.everest.service.DiscountService;
 import com.everest.util.InputUtil;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 @SpringBootApplication
 public class RoadRunnersApplication implements CommandLineRunner {
 
-    private final DiscountService discountService;
     private final ETAService etaService;
+    private final DiscountService discountService;
 
     public RoadRunnersApplication(
-            DiscountService discountService,
-            ETAService etaService
+            ETAService etaService,
+            DiscountService discountService
     ) {
-        this.discountService = discountService;
         this.etaService = etaService;
+        this.discountService = discountService;
     }
 
     public static void main(String[] args) {
@@ -36,25 +35,38 @@ public class RoadRunnersApplication implements CommandLineRunner {
 
         Scanner scanner = new Scanner(System.in);
 
-        int count = InputUtil.readInt(scanner, "Enter number of packages: ");
+        int packageCount =
+                InputUtil.readInt(scanner, "Enter number of packages: ");
+
         List<Package> packages = new ArrayList<>();
 
-        for (int i = 0; i < count; i++) {
-            System.out.println("\nPackage " + (i + 1));
+        for (int i = 0; i < packageCount; i++) {
+            System.out.println("\nEnter package details:");
 
-            String id = InputUtil.readString(scanner, "ID: ");
-            double weight = InputUtil.readDouble(scanner, "Weight (kg): ");
-            double distance = InputUtil.readDouble(scanner, "Distance (km): ");
+            String id =
+                    InputUtil.readString(scanner, "Package ID: ");
+            double weight =
+                    InputUtil.readDouble(scanner, "Weight (kg): ");
+            double distance =
+                    InputUtil.readDouble(scanner, "Distance (km): ");
+            OfferCode offerCode =
+                    InputUtil.readOfferCode(scanner);
 
-            System.out.println("Offer Code: 1.NONE  2.OFR001  3.OFR002  4.OFR003");
-            int choice = InputUtil.readInt(scanner, "Choose: ");
-
-            OfferCode offer = OfferCode.values()[choice - 1];
-
-            Package pkg = new Package(id, weight, distance, offer);
-            discountService.applyDiscount(pkg);
-            packages.add(pkg);
+            packages.add(new Package(id, weight, distance, offerCode));
         }
+
+        packages.forEach(Package::calculateCost);
+
+        System.out.println("\nDelivery Cost Details:");
+        packages.forEach(pkg ->
+                System.out.printf(
+                        "%s %.0f %.0f %.2f %n",
+                        pkg.getId(),
+                        pkg.getDiscount(),
+                        pkg.getTotalCost(),
+                        pkg.getBaseCost()
+                )
+        );
 
         List<Vehicle> vehicles = List.of(
                 new Vehicle(200, 70),
@@ -63,15 +75,17 @@ public class RoadRunnersApplication implements CommandLineRunner {
 
         etaService.calculateETAs(packages, vehicles);
 
-        System.out.println("\nFINAL OUTPUT:");
-        packages.forEach(p ->
-                System.out.printf(
-                        "%s | Cost: %.2f | Discount: %.2f | ETA: %.2f hrs%n",
-                        p.getId(),
-                        p.getTotalCost(),
-                        p.getDiscount(),
-                        p.getEstimatedDeliveryTime()
-                )
-        );
+        System.out.println("\nEstimated Delivery Times:");
+        System.out.println("\nETAs:");
+        for (Package pkg : packages) {
+            System.out.printf(
+                    "%s %.0f %.0f %.2f%n",
+                    pkg.getId(),
+                    pkg.getDiscount(),
+                    pkg.getTotalCost(),
+                    pkg.getEta()
+            );
+        }
+
     }
 }

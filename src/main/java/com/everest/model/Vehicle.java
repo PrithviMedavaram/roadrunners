@@ -2,29 +2,32 @@ package com.everest.model;
 
 public class Vehicle {
 
-    private final double maxLoad;
+    private final double maxWeight;
     private final double speed;
-    private double availableAt;
+    private double availableAt = 0.0;
 
-    public Vehicle(double maxLoad, double speed) {
-        this.maxLoad = maxLoad;
+    public Vehicle(double maxWeight, double speed) {
+        this.maxWeight = maxWeight;
         this.speed = speed;
-        this.availableAt = 0.0;
-    }
-
-    public double getMaxLoad() {
-        return maxLoad;
     }
 
     public double getSpeed() {
         return speed;
     }
 
-    public double getAvailableAt() {
+    public double getAvailableIn() {
         return availableAt;
     }
 
-    public void assign(double travelTime) {
-        this.availableAt += travelTime;
+    public void addReturnTime(double time) {
+        this.availableAt += time;
+    }
+
+    public double getMaxWeight() {
+        return maxWeight;
+    }
+
+    public void setAvailableIn(double availableAt) {
+        this.availableAt = availableAt;
     }
 }
