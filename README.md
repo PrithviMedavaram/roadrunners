@@ -13,6 +13,7 @@ Make sure you have the following installed:
 1. Clone the repository:
    ```
    git clone git@github.com:PrithviMedavaram/roadrunners.git
+   git checkout master
 2. Navigate to the project directory:
    ```
    cd roadrunners
